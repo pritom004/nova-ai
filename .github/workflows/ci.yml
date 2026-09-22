@@ -1,0 +1,15 @@
+name: CI/CD Pipeline for Elastic Beanstalk Deployment
+on: 
+    push:
+        branches: 
+            - main
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v7
+            - name: Build Docker Image
+              run: docker build -t pritom06/nova -f Dockerfile.dev .
+            - name: Run Test
+              run: docker run pritom06/nova npm run lint
