@@ -13,3 +13,22 @@ jobs:
               run: docker build -t pritom06/nova -f Dockerfile.dev .
             - name: Run Test
               run: docker run pritom06/nova npm run lint
+    deploy:
+        name: Deploy to Beanstalk Deployment
+        needs: test
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout repository
+            run: actions/checkout@v7
+          - name: Generate deployment package
+            run: zip -r deploy.zip . -x '*.git*' 'node_modules'
+          - name: Deploy to EB
+            uses: einaregilsson/beanstalk-deploy@v22
+            with:
+              aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              application_name: nova-ai
+              environment_name: Nova-ai-env
+              version_label: nova-${{github.sha}}
+              region: us-east-1
+              deployment_package: deploy.zip
